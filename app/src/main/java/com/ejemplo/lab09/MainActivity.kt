@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -45,20 +46,27 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ProgPrincipal9() {
-    val urlBase = "https://json-placeholder.mock.beeceptor.com/"
-    val retrofit = Retrofit.Builder()
-        .baseUrl(urlBase)
+    val urlBasePosts = "https://jsonplaceholder.typicode.com/"
+    val retrofitPosts = Retrofit.Builder()
+        .baseUrl(urlBasePosts)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+    val servicioPosts = retrofitPosts.create(PostApiService::class.java)
 
-    val servicio = retrofit.create(PostApiService::class.java)
+    val urlBaseRecetas = "https://dummyjson.com/"
+    val retrofitRecetas = Retrofit.Builder()
+        .baseUrl(urlBaseRecetas)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    val servicioRecetas = retrofitRecetas.create(RecipeApiService::class.java)
+
     val navController = rememberNavController()
 
     Scaffold(
         topBar = { BarraSuperior() },
         bottomBar = { BarraInferior(navController) },
         content = { paddingValues ->
-            Contenido(paddingValues, navController, servicio)
+            Contenido(paddingValues, navController, servicioPosts, servicioRecetas)
         }
     )
 }
@@ -75,7 +83,7 @@ fun BarraSuperior() {
             )
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = Color(0xFF4C5B93)
         )
     )
 }
@@ -83,7 +91,7 @@ fun BarraSuperior() {
 @Composable
 fun BarraInferior(navController: NavHostController) {
     NavigationBar(
-        containerColor = Color.LightGray
+        containerColor = Color(0xFFEFEFEF)
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Home, contentDescription = "Inicio") },
@@ -97,6 +105,12 @@ fun BarraInferior(navController: NavHostController) {
             selected = navController.currentDestination?.route == "posts",
             onClick = { navController.navigate("posts") }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Restaurant, contentDescription = "Recetas") },
+            label = { Text("Recetas") },
+            selected = navController.currentDestination?.route == "recetas",
+            onClick = { navController.navigate("recetas") }
+        )
     }
 }
 
@@ -104,7 +118,8 @@ fun BarraInferior(navController: NavHostController) {
 fun Contenido(
     pv: PaddingValues,
     navController: NavHostController,
-    servicio: PostApiService
+    servicioPosts: PostApiService,
+    servicioRecetas: RecipeApiService
 ) {
     Box(
         modifier = Modifier
@@ -113,15 +128,24 @@ fun Contenido(
     ) {
         NavHost(
             navController = navController,
-            startDestination = "inicio"
+            startDestination = "posts"
         ) {
             composable("inicio") { ScreenInicio() }
-            composable("posts") { ScreenPosts(navController, servicio) }
+            composable("posts") { ScreenPosts(navController, servicioPosts) }
             composable(
                 "postsVer/{id}",
                 arguments = listOf(navArgument("id") { type = NavType.IntType })
             ) {
-                ScreenPost(navController, servicio, it.arguments!!.getInt("id"))
+                val id = it.arguments?.getInt("id") ?: 1
+                ScreenPost(navController, servicioPosts, id)
+            }
+            composable("recetas") { ScreenRecetas(navController, servicioRecetas) }
+            composable(
+                "recetasVer/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
+            ) {
+                val id = it.arguments?.getInt("id") ?: 1
+                ScreenReceta(navController, servicioRecetas, id)
             }
         }
     }
@@ -129,5 +153,7 @@ fun Contenido(
 
 @Composable
 fun ScreenInicio() {
-    Text("INICIO")
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text("INICIO", modifier = Modifier.padding(16.dp))
+    }
 }

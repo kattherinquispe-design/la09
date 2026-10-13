@@ -1,4 +1,4 @@
-package com.example.lab09
+package com.ejemplo.lab09
 
 import retrofit2.http.GET
 import retrofit2.http.Path
