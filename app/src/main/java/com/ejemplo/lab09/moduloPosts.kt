@@ -1,5 +1,3 @@
-package com.ejemplo.lab09
-
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,26 +28,23 @@ import androidx.navigation.NavHostController
 @Composable
 fun ScreenPosts(navController: NavHostController, servicio: PostApiService) {
     var listaPosts: SnapshotStateList<PostModel> = remember { mutableStateListOf() }
-
     LaunchedEffect(Unit) {
-        try {
-            val listado = servicio.getUserPosts()
-            listado.forEach { listaPosts.add(it) }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val listado = servicio.getUserPosts()
+        listado.forEach { listaPosts.add(it) }
     }
 
-    LazyColumn {
+    LazyColumn (
+
+    ){
         items(listaPosts) { item ->
             Row(modifier = Modifier.padding(8.dp)) {
                 Text(text = item.id.toString(), Modifier.weight(0.05f), textAlign = TextAlign.End)
-                Spacer(Modifier.padding(horizontal = 1.dp))
+                Spacer(Modifier.padding(horizontal=1.dp))
                 Text(text = item.title, Modifier.weight(0.7f))
                 IconButton(
                     onClick = {
                         navController.navigate("postsVer/${item.id}")
-                        Log.e("POSTS", "ID = ${item.id}")
+                        Log.e("POSTS","ID = ${item.id}")
                     },
                     Modifier.weight(0.1f)
                 ) {
@@ -63,22 +58,16 @@ fun ScreenPosts(navController: NavHostController, servicio: PostApiService) {
 @Composable
 fun ScreenPost(navController: NavHostController, servicio: PostApiService, id: Int) {
     var post by remember { mutableStateOf<PostModel?>(null) }
-
     LaunchedEffect(Unit) {
-        try {
-            val xpost = servicio.getUserPostById(id)
-            post = xpost.copy()?.takeIf { xpost.body != null }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val xpost = servicio.getUserPostById(id)
+        post = xpost.copy()?.takeIf { xpost.body != null }
     }
-
     Column(
         Modifier
             .padding(8.dp)
             .fillMaxSize()
     ) {
-        if (post != null) {
+        if (post != null){
             OutlinedTextField(
                 value = post!!.id.toString(),
                 onValueChange = {},
@@ -92,13 +81,13 @@ fun ScreenPost(navController: NavHostController, servicio: PostApiService, id: I
                 readOnly = true
             )
             OutlinedTextField(
-                value = post!!.title,
+                value = post!!.title.toString(),
                 onValueChange = {},
                 label = { Text("title") },
                 readOnly = true
             )
             OutlinedTextField(
-                value = post!!.body,
+                value = post!!.body.toString(),
                 onValueChange = {},
                 label = { Text("body") },
                 readOnly = true
