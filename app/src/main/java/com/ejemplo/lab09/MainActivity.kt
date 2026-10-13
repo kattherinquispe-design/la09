@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ProgPrincipal9() {
+    // API de Posts
     val urlBasePosts = "https://jsonplaceholder.typicode.com/"
     val retrofitPosts = Retrofit.Builder()
         .baseUrl(urlBasePosts)
@@ -53,6 +55,7 @@ fun ProgPrincipal9() {
         .build()
     val servicioPosts = retrofitPosts.create(PostApiService::class.java)
 
+    // API de Recetas
     val urlBaseRecetas = "https://dummyjson.com/"
     val retrofitRecetas = Retrofit.Builder()
         .baseUrl(urlBaseRecetas)
@@ -60,13 +63,21 @@ fun ProgPrincipal9() {
         .build()
     val servicioRecetas = retrofitRecetas.create(RecipeApiService::class.java)
 
+    // API de Anfibios (Google AppSpot URL Real)
+    val urlBaseAnfibios = "https://android-kotlin-fun-mars-server.appspot.com/"
+    val retrofitAnfibios = Retrofit.Builder()
+        .baseUrl(urlBaseAnfibios)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    val servicioAnfibios = retrofitAnfibios.create(AmphibianApiService::class.java)
+
     val navController = rememberNavController()
 
     Scaffold(
         topBar = { BarraSuperior() },
         bottomBar = { BarraInferior(navController) },
         content = { paddingValues ->
-            Contenido(paddingValues, navController, servicioPosts, servicioRecetas)
+            Contenido(paddingValues, navController, servicioPosts, servicioRecetas, servicioAnfibios)
         }
     )
 }
@@ -77,7 +88,7 @@ fun BarraSuperior() {
     CenterAlignedTopAppBar(
         title = {
             Text(
-                text = "JSONPlaceHolder Access",
+                text = "Lab 09 - Retrofit & APIs",
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
@@ -111,6 +122,12 @@ fun BarraInferior(navController: NavHostController) {
             selected = navController.currentDestination?.route == "recetas",
             onClick = { navController.navigate("recetas") }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Pets, contentDescription = "Anfibios") },
+            label = { Text("Anfibios") },
+            selected = navController.currentDestination?.route == "anfibios",
+            onClick = { navController.navigate("anfibios") }
+        )
     }
 }
 
@@ -119,7 +136,8 @@ fun Contenido(
     pv: PaddingValues,
     navController: NavHostController,
     servicioPosts: PostApiService,
-    servicioRecetas: RecipeApiService
+    servicioRecetas: RecipeApiService,
+    servicioAnfibios: AmphibianApiService
 ) {
     Box(
         modifier = Modifier
@@ -147,6 +165,7 @@ fun Contenido(
                 val id = it.arguments?.getInt("id") ?: 1
                 ScreenReceta(navController, servicioRecetas, id)
             }
+            composable("anfibios") { ScreenAnfibios(servicioAnfibios) }
         }
     }
 }
